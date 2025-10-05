@@ -2,32 +2,38 @@ package cli;
 
 import algorithms.MinHeap;
 import metrics.PerformanceTracker;
-
 import java.util.Random;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.BufferedWriter;
 
 public class BenchmarkRunner {
     public static void main(String[] args) {
-        int n = 10000;  // Size of the array
-        MinHeap heap = new MinHeap(n);
-        PerformanceTracker tracker = new PerformanceTracker();
+        int[] sizes = {100, 1000, 10000, 100000};
         Random random = new Random();
 
-        // Benchmark insertions
-        for (int i = 0; i < n; i++) {
-            int value = random.nextInt(10000);
-            heap.insert(value);
-            tracker.incrementArrayAccesses();
-        }
+        String csvFile = "docs/benchmark_results.csv";
 
-        // Benchmark extractions
-        for (int i = 0; i < n; i++) {
-            heap.extractMin();
-            tracker.incrementArrayAccesses();
-        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
+            writer.write("Array Size,Time (ms),Swaps,Comparisons\n");
 
-        // Output performance metrics
-        System.out.println("Comparisons: " + tracker.getComparisons());
-        System.out.println("Swaps: " + tracker.getSwaps());
-        System.out.println("Array Accesses: " + tracker.getArrayAccesses());
+            for (int n : sizes) {
+                MinHeap heap = new MinHeap(n);
+                PerformanceTracker tracker = new PerformanceTracker();
+
+                long start = System.nanoTime();
+
+                for (int i = 0; i < n; i++) {
+                    heap.insert(random.nextInt());
+                }
+
+                long end = System.nanoTime();
+
+                writer.write(n + "," + (end - start) / 1_000_000.0 + "," + tracker.getSwaps() + "," + tracker.getComparisons() + "\n");
+            }
+            System.out.println("Benchmark results saved to " + csvFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

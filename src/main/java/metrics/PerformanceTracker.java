@@ -29,7 +29,6 @@ public class PerformanceTracker {
         memoryAllocations++;
     }
 
-    // Getters for performance metrics
     public long getComparisons() {
         return comparisons;
     }
